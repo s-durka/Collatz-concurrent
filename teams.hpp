@@ -107,7 +107,8 @@ public:
 
     static void insertCollatz(ContestResult &result, uint64_t i, uint64_t idx,
                   const InfInt &n, std::queue<uint64_t> &readyToJoin,std::mutex &mutex,
-                  std::condition_variable &cond, rtimers::cxx11::ThreadedTimer& thTimer);
+                  std::condition_variable &cond, rtimers::cxx11::ThreadedTimer& thTimer,
+                  rtimers::cxx11::DefaultTimer& soloTimer2);
 };
 
 class TeamConstThreads : public TeamThreads
@@ -126,6 +127,12 @@ public:
     virtual ContestResult runContestImpl(ContestInput const & contestInput);
 
     virtual std::string getInnerName() { return "TeamConstThreads"; }
+
+
+    static void insertCollatz(ContestResult &result,
+                              const ContestInput& input,
+                              size_t threadsNum, size_t myNum,
+                              rtimers::cxx11::ThreadedTimer &thTimer);
 };
 
 class TeamPool : public Team

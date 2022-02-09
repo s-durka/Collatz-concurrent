@@ -9,11 +9,14 @@
 
 void TeamNewThreads::insertCollatz(ContestResult & result, uint64_t i, uint64_t idx, InfInt const & n,
                                             std::queue<uint64_t>& readyToJoin, std::mutex& mutex,
-                                            std::condition_variable& cond, rtimers::cxx11::ThreadedTimer& thTimer) {
+                                            std::condition_variable& cond, rtimers::cxx11::ThreadedTimer& thTimer,
+                                            rtimers::cxx11::DefaultTimer& soloTimer2) {
     thTimer.scopedStart();
+    soloTimer2.scopedStart();
     result[idx] = calcCollatz(n);
     std::unique_lock<std::mutex> lock(mutex);
     readyToJoin.push(i);
+    lock.unlock();
     cond.notify_all();
 }
 ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
@@ -27,9 +30,11 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 
     rtimers::cxx11::DefaultTimer soloTimer("CalcCollatzSoloTimer");
     rtimers::cxx11::ThreadedTimer thTimer("NewThreadsTimer");
+    rtimers::cxx11::DefaultTimer soloTimer2("CalcCollatzSoloTimer2");
+
 
     uint32_t maxThreads = this->getSize();
-    printf("MAX THREADS = %d\n", maxThreads);
+//    printf("MAX THREADS = %d\n", maxThreads);
     std::thread threads[maxThreads];
     uint64_t i = 0;
     uint64_t waitingThreads = 0;
@@ -37,22 +42,19 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
     {
         auto scopedStartStop = soloTimer.scopedStart();
         if (i < maxThreads) {
-            threads[i] = createThread([&result, i, idx, &singleInput, &readyToJoin, &cond_mutex, &cond, &thTimer]
-                    {insertCollatz(result, i, idx, singleInput, readyToJoin, cond_mutex, cond, thTimer);});
+            threads[i] = createThread([&result, i, idx, &singleInput, &readyToJoin, &cond_mutex, &cond, &thTimer, &soloTimer2]
+                    { insertCollatz(result, i, idx, singleInput, readyToJoin, cond_mutex, cond, thTimer, soloTimer2); });
         } else {
             std::unique_lock<std::mutex> lock(cond_mutex);
             waitingThreads++;
             cond.wait(lock, [&readyToJoin]{ return !readyToJoin.empty(); });
             uint64_t j = readyToJoin.front();
-//            printf("PPPPP j = %d\n", j);
-//            printf("joinable: %d\n", threads[j].joinable());
             threads[j].join();
             waitingThreads--;
             readyToJoin.pop();
-            threads[j] = createThread([&result, j, idx, &singleInput, &readyToJoin, &cond_mutex, &cond, &thTimer, this]
-                                      {insertCollatz(result, j, idx, singleInput, readyToJoin, cond_mutex, cond, thTimer);});
+            threads[j] = createThread([&result, j, idx, &singleInput, &readyToJoin, &cond_mutex, &cond, &thTimer, &soloTimer2]
+                                      { insertCollatz(result, j, idx, singleInput, readyToJoin, cond_mutex, cond, thTimer, soloTimer2); });
         }
-//        insertCollatz(result, idx, singleInput);
         ++idx;
         ++i;
     }
@@ -76,10 +78,36 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
     return result;
 }
 
+void TeamConstThreads::insertCollatz(ContestResult & result,
+                                     ContestInput const & input,
+                                     size_t threadsNum,
+                                     size_t myNum,
+                                     rtimers::cxx11::ThreadedTimer& thTimer) {
+
+    for (size_t i = myNum; i < input.size(); i+= threadsNum) {
+        thTimer.scopedStart();
+//        printf("Thread %zu - calcCollatz[%zu];\n", myNum, i);
+        result[i] = calcCollatz(input[i]);
+    }
+}
+
 ContestResult TeamConstThreads::runContestImpl(ContestInput const & contestInput)
 {
     ContestResult r;
-    //TODO
+    size_t threadsNum = this->getSize();
+    printf("getSize = %u", this->getSize());
+    r.resize(contestInput.size());
+    rtimers::cxx11::DefaultTimer soloTimer("CalcCollatzSoloTimer");
+    rtimers::cxx11::ThreadedTimer thTimer("NewThreadsTimer");
+    std::thread threads[threadsNum];
+    for (size_t thIndex = 0; thIndex < threadsNum; thIndex++) {
+        printf("THREAD %zu CREATED\n", thIndex);
+        threads[thIndex] = createThread([&threadsNum, &r, &contestInput, thIndex, &thTimer ]
+                { insertCollatz(r, contestInput, threadsNum, thIndex, thTimer); });
+    }
+    for (size_t thIndex = 0; thIndex < threadsNum; thIndex++) {
+        threads[thIndex].join();
+    }
     return r;
 }
 

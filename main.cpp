@@ -50,6 +50,11 @@ int main(int argc, char ** argv)
                 }
                 if (expectedResult)
                 {
+//                    printf("EXPECTED:\n");
+//                    for (auto number : *expectedResult) printf(" %lu, ", number);
+//                    printf("\nLAST :\n");
+//                    for (auto num2 : lastResult) printf(" %lu, ", num2);
+//                    printf("\n");
                     assert(*expectedResult == lastResult);
                 }
                 else
