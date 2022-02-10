@@ -22,8 +22,6 @@ public:
         if (shareResults)
         {
             this->sharedResults.reset(new SharedResults{});
-//            this->sharedResults = std::make_shared<SharedResults>(*sharedResults);
-
         }
     }
     virtual ~Team() {}
@@ -40,8 +38,6 @@ public:
     virtual std::string getTeamName() { return this->getInnerName() + this->getXname() + "<" + std::to_string(this->size) + ">"; }
     uint32_t getSize() const { return this->size; }
 
-//    static uint64_t calcCollatzRecursive(InfInt n, uint64_t count,
-//                                  std::shared_ptr<SharedResults> shared);
     static uint64_t calcCollatzRecursive(InfInt n, std::shared_ptr<SharedResults> shared);
 
 private:
@@ -112,9 +108,9 @@ public:
 
     virtual std::string getInnerName() { return "TeamNewThreads"; }
 
-    static void insertCollatz(ContestResult &result, uint64_t i, uint64_t idx,
+    void insertCollatz(ContestResult &result, uint64_t i, uint64_t idx,
                   const InfInt &n, std::queue<uint64_t> &readyToJoin,std::mutex &mutex,
-                  std::condition_variable &cond);
+                  std::condition_variable &cond, bool share);
 };
 
 class TeamConstThreads : public TeamThreads

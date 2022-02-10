@@ -20,19 +20,18 @@ int main(int argc, char ** argv)
     };
 
     std::vector<std::shared_ptr<Team>> teams;
-//    teams.push_back(std::shared_ptr<Team>(new TeamSolo{1}));
+    teams.push_back(std::shared_ptr<Team>(new TeamSolo{1}));
     for (bool share : {false, true})
-//    for (bool share : {true})
         {
         for (uint32_t numWorkers : {1,2,3,4,7,10})
         {
-//            teams.push_back(std::shared_ptr<Team>(new TeamNewThreads{numWorkers, share}));
+            teams.push_back(std::shared_ptr<Team>(new TeamNewThreads{numWorkers, share}));
             teams.push_back(std::shared_ptr<Team>(new TeamConstThreads{numWorkers, share}));
-//            teams.push_back(std::shared_ptr<Team>(new TeamPool{numWorkers, share}));
+            teams.push_back(std::shared_ptr<Team>(new TeamPool{numWorkers, share}));
 //            teams.push_back(std::shared_ptr<Team>(new TeamNewProcesses{numWorkers, share}));
 //            teams.push_back(std::shared_ptr<Team>(new TeamConstProcesses{numWorkers, share}));
         }
-//        teams.push_back(std::shared_ptr<Team>(new TeamAsync{1, share}));
+        teams.push_back(std::shared_ptr<Team>(new TeamAsync{1, share}));
     }
 
     for (auto generator : generators)
@@ -58,20 +57,10 @@ int main(int argc, char ** argv)
                     expectedResult.reset(new ContestResult{});
                     *expectedResult = lastResult;
                 }
-//                std::cout << "aaaa   ..." << timer.getStats().mean << "   aaaaaaa\n";
+                std::cout << "..." << timer.getStats().mean << "...\n";
             }
         }
     }
 
     return 0;
 }
-
-//                    for (size_t i = 0; i < expectedResult->size(); i++) {
-////                        ContestResult* expected = expectedResult.get();
-//                        printf("%lu, ", (*expectedResult)[i] - lastResult[i]);
-//                    }
-//                    printf("EXPECTED:\n");
-//                    for (auto number : *expectedResult) printf(" %lu, ", number);
-//                    printf("\nLAST :\n");
-//                    for (auto num2 : lastResult) printf(" %lu, ", num2);
-//                    printf("\n");

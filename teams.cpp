@@ -34,8 +34,12 @@
 
 void TeamNewThreads::insertCollatz(ContestResult & result, uint64_t i, uint64_t idx, InfInt const & n,
                                             std::queue<uint64_t>& readyToJoin, std::mutex& mutex,
-                                            std::condition_variable& cond) {
-    result[idx] = calcCollatz(n);
+                                            std::condition_variable& cond, bool share) {
+    if (share) {
+        result[idx] = calcCollatzRecursive(n, this->getSharedResults());
+    } else {
+        result[idx] = calcCollatz(n);
+    }
     std::unique_lock<std::mutex> lock(mutex);
     readyToJoin.push(i);
     lock.unlock();
@@ -48,6 +52,7 @@ void TeamNewThreads::insertCollatz(ContestResult & result, uint64_t i, uint64_t 
  */
 ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 {
+    bool share = (this->getSharedResults() != nullptr);
     ContestResult result;
     result.resize(contestInput.size());
     uint64_t idx = 0;
@@ -62,8 +67,8 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
     for(InfInt const & singleInput : contestInput)
     {
         if (i < maxThreads) {
-            threads[i] = createThread([&result, i, idx, &singleInput, &readyToJoin, &cond_mutex, &cond]
-                    { insertCollatz(result, i, idx, singleInput, readyToJoin, cond_mutex, cond); });
+            threads[i] = createThread([this, share, &result, i, idx, &singleInput, &readyToJoin, &cond_mutex, &cond]
+                    { insertCollatz(result, i, idx, singleInput, readyToJoin, cond_mutex, cond, share); });
         } else {
             std::unique_lock<std::mutex> lock(cond_mutex);
             waitingThreads++;
@@ -72,8 +77,8 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
             threads[j].join();
             waitingThreads--;
             readyToJoin.pop();
-            threads[j] = createThread([&result, j, idx, &singleInput, &readyToJoin, &cond_mutex, &cond]
-                                      { insertCollatz(result, j, idx, singleInput, readyToJoin, cond_mutex, cond); });
+            threads[j] = createThread([this, &result, j, share, idx, &singleInput, &readyToJoin, &cond_mutex, &cond]
+                                      { insertCollatz(result, j, idx, singleInput, readyToJoin, cond_mutex, cond, share); });
         }
         ++idx;
         ++i;
