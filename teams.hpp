@@ -134,10 +134,8 @@ public:
 
     virtual std::string getInnerName() { return "TeamConstThreads"; }
 
-
-    static void insertCollatz(ContestResult &result,
-                              const ContestInput& input,
-                              size_t threadsNum, size_t myNum);
+    void insertCollatz(ContestResult &result, const ContestInput &input,
+                       size_t threadsNum, size_t myNum, bool share);
 };
 
 class TeamPool : public Team

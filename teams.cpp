@@ -10,17 +10,14 @@
  uint64_t Team::calcCollatzRecursive(InfInt n, std::shared_ptr<SharedResults> shared)
 {
     // It's ok even if the value overflow
-//    printf("n = %lu, count = %lu \n", n.toUnsignedLong(), count);
-
     assert(n > 0);
+    uint64_t c;
+
     if (n == 1) {
-        printf("ssssssssssssssssssssss\n");
         return 0;
-    }
-    else {
-        printf("zzzzzzzzzzzzzzzzzzzzzzz\n");
+    } else {
         InfInt new_n;
-        uint64_t c = shared->getValue(n.toUnsignedLong());
+        c = shared->getValue(n);
         if (c != 0) return c;
         // else
         if (n % 2 == 1) {
@@ -29,11 +26,9 @@
         } else {
             new_n = n / 2;
         }
-        printf("new_n == %lu\n", new_n.toUnsignedLong());
         uint64_t count = calcCollatzRecursive(new_n, shared);
-        shared->setValue(n.toUnsignedLong(), count + 1);
+        shared->setValue(n, count + 1);
         return count + 1;
-//        return 1;
     }
 }
 
@@ -129,25 +124,28 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 void TeamConstThreads::insertCollatz(ContestResult & result,
                                      ContestInput const & input,
                                      size_t threadsNum,
-                                     size_t myNum) {
+                                     size_t myNum, bool share) {
 
     for (size_t i = myNum; i < input.size(); i+= threadsNum) {
-        result[i] = calcCollatz(input[i]);
+        if (share)
+            result[i] = calcCollatzRecursive(input[i], this->getSharedResults());
+        else
+            result[i] = calcCollatz(input[i]);
     }
 }
 
-ContestResult TeamConstThreads::runContestImpl(ContestInput const & contestInput)
-{
+ContestResult TeamConstThreads::runContestImpl(ContestInput const & contestInput) {
     ContestResult r;
     r.resize(contestInput.size());
     size_t threadsNum = this->getSize();
-//    printf("getSize = %u", this->getSize());
-
+    std::shared_ptr<SharedResults> sharedPtr = this->getSharedResults();
+    bool share = !(sharedPtr == nullptr);
     std::thread threads[threadsNum];
     for (size_t thIndex = 0; thIndex < threadsNum; thIndex++) {
-//        printf("THREAD %zu CREATED\n", thIndex);
-        threads[thIndex] = createThread([&threadsNum, &r, &contestInput, thIndex ]
-                { insertCollatz(r, contestInput, threadsNum, thIndex); });
+        threads[thIndex] = createThread(
+                [this, &threadsNum, &r, &contestInput, thIndex, share] {
+                    insertCollatz(r, contestInput, threadsNum, thIndex, share);
+                    });
     }
     for (size_t thIndex = 0; thIndex < threadsNum; thIndex++) {
         threads[thIndex].join();
@@ -200,14 +198,8 @@ ContestResult TeamAsync::runContest(ContestInput const & contestInput)
         }
     } else {
         for(InfInt const & singleInput : contestInput) {
-//            futures.push_back(std::async(std::launch::async,[&singleInput, i, &r, this]
-//                                { r[i] = calcCollatzRecursive(singleInput, 0, this->getSharedResults()); }));
-//            futures.push_back(std::async([&singleInput, i, &r, this]
-//            { r[i] = calcCollatzRecursive(singleInput, 0, this->getSharedResults()); }));
-            std::shared_ptr<SharedResults> sharedPtr = this->getSharedResults();
-            if (sharedPtr == NULL) printf("NULL\n");
-//            sharedPtr->print(5);
-            r[i] = calcCollatzRecursive(singleInput, sharedPtr);
+            futures.push_back(std::async([&singleInput, i, &r, this]
+            { r[i] = calcCollatzRecursive(singleInput, this->getSharedResults()); }));
             i++;
         }
     }
