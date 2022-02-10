@@ -21,8 +21,9 @@ int main(int argc, char ** argv)
 
     std::vector<std::shared_ptr<Team>> teams;
 //    teams.push_back(std::shared_ptr<Team>(new TeamSolo{1}));
-    for (bool share : {false, true})
-    {
+//    for (bool share : {false, true})
+    for (bool share : {true, false})
+        {
         for (uint32_t numWorkers : {1,2,3,4,7,10})
         {
 //            teams.push_back(std::shared_ptr<Team>(new TeamNewThreads{numWorkers, share}));
@@ -50,15 +51,16 @@ int main(int argc, char ** argv)
                 }
                 if (expectedResult)
                 {
-//                    printf("EXPECTED:\n");
-//                    for (auto number : *expectedResult) printf(" %lu, ", number);
-//                    printf("\nLAST :\n");
-//                    for (auto num2 : lastResult) printf(" %lu, ", num2);
-//                    printf("\n");
+                                        printf("EXPECTED:\n");
+                    for (auto number : *expectedResult) printf(" %lu, ", number);
+                    printf("\nLAST :\n");
+                    for (auto num2 : lastResult) printf(" %lu, ", num2);
+                    printf("\n");
                     assert(*expectedResult == lastResult);
                 }
                 else
                 {
+
                     expectedResult.reset(new ContestResult{});
                     *expectedResult = lastResult;
                 }

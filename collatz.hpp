@@ -2,6 +2,7 @@
 #define COLLATZ_HPP
 
 #include <assert.h>
+#include "sharedresults.hpp"
 
 inline uint64_t calcCollatz(InfInt n)
 {
@@ -21,8 +22,9 @@ inline uint64_t calcCollatz(InfInt n)
             n /= 2;
         }            
     }
-
     return count;
 }
+
+
 
 #endif

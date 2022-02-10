@@ -2,32 +2,47 @@
 #define SHAREDRESULTS_HPP
 
 #define SHARED_RESULTS_SIZE 1000000
+#include <atomic>
 
 class SharedResults
 {
-//TODO
 public:
-    SharedResults() {
-        arr = new std::atomic<uint64_t>[SHARED_RESULTS_SIZE]{};
-        for (int i = 0; i < SHARED_RESULTS_SIZE; i++) {
-            arr[i] = -1;
-        }
+    SharedResults() : arr{} {
+        printf("new shared results\n");
+        print(2);
+        for (int i = 0; i < 3; i++)
+            printf("--%lu, ", arr[i]);
+//        for (int i = 0; i < SHARED_RESULTS_SIZE; i++) {
+//            arr[i] = std::atomic<uint64_t>(-1);
+//        }
     }
-    ~SharedResults() {
-        delete[] arr;
+//    ~SharedResults() =default;
+//        delete[] arr;
+
+    void print(uint64_t n) {
+        for (int i = 0; i < n; i++)
+            printf("%lu, ", arr[i]);
+        printf("\n");
     }
 
     uint64_t getValue(size_t key) {
-        return arr[key].load();
+//        printf("get value\n");
+//        printf("key = %lu\n", key);
+//        printf("arr[key] = %lu\n", arr[key]);
+//        print(4);
+        return arr[key];
     }
 
-    void setValue(size_t key, uint64_t value) {
-        uint64_t expected = -1;
-        arr[key].compare_exchange_weak(expected, value);
+    bool setValue(size_t key, uint64_t value) {
+        if (key >= SHARED_RESULTS_SIZE) return false;
+        std::atomic<uint64_t> expected(value); // value in array is 0 <==> value not set yet
+        return expected.compare_exchange_weak(arr[key], value);
     }
 private:
-    std::atomic<uint64_t>* arr;
-
+//    std::atomic<uint64_t>* arr;
+    std::array<uint64_t, SHARED_RESULTS_SIZE> arr;
+//    std::atomic<uint64_t> arr2[SHARED_RESULTS_SIZE];
 };
+
 
 #endif

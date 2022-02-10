@@ -7,7 +7,35 @@
 #include "contest.hpp"
 #include "collatz.hpp"
 
+ uint64_t Team::calcCollatzRecursive(InfInt n, std::shared_ptr<SharedResults> shared)
+{
+    // It's ok even if the value overflow
+//    printf("n = %lu, count = %lu \n", n.toUnsignedLong(), count);
 
+    assert(n > 0);
+    if (n == 1) {
+        printf("ssssssssssssssssssssss\n");
+        return 0;
+    }
+    else {
+        printf("zzzzzzzzzzzzzzzzzzzzzzz\n");
+        InfInt new_n;
+        uint64_t c = shared->getValue(n.toUnsignedLong());
+        if (c != 0) return c;
+        // else
+        if (n % 2 == 1) {
+            new_n = n * 3;
+            new_n += 1;
+        } else {
+            new_n = n / 2;
+        }
+        printf("new_n == %lu\n", new_n.toUnsignedLong());
+        uint64_t count = calcCollatzRecursive(new_n, shared);
+        shared->setValue(n.toUnsignedLong(), count + 1);
+        return count + 1;
+//        return 1;
+    }
+}
 
 void TeamNewThreads::insertCollatz(ContestResult & result, uint64_t i, uint64_t idx, InfInt const & n,
                                             std::queue<uint64_t>& readyToJoin, std::mutex& mutex,
@@ -165,9 +193,23 @@ ContestResult TeamAsync::runContest(ContestInput const & contestInput)
 
     std::vector<std::future<void>> futures;
     int i = 0;
-    for(InfInt const & singleInput : contestInput) {
-        futures.push_back(std::async(std::launch::async, [&singleInput, i, &r]{r[i] = calcCollatz(singleInput);}));
-        i++;
+    if (!this->getSharedResults()) {
+        for(InfInt const & singleInput : contestInput) {
+            futures.push_back(std::async(std::launch::async, [&singleInput, i, &r]{ r[i] = calcCollatz(singleInput); }));
+            i++;
+        }
+    } else {
+        for(InfInt const & singleInput : contestInput) {
+//            futures.push_back(std::async(std::launch::async,[&singleInput, i, &r, this]
+//                                { r[i] = calcCollatzRecursive(singleInput, 0, this->getSharedResults()); }));
+//            futures.push_back(std::async([&singleInput, i, &r, this]
+//            { r[i] = calcCollatzRecursive(singleInput, 0, this->getSharedResults()); }));
+            std::shared_ptr<SharedResults> sharedPtr = this->getSharedResults();
+            if (sharedPtr == NULL) printf("NULL\n");
+//            sharedPtr->print(5);
+            r[i] = calcCollatzRecursive(singleInput, sharedPtr);
+            i++;
+        }
     }
     for (auto& f : futures) {
         f.get();

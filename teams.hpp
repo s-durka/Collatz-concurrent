@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <assert.h>
+#include <memory>
 
 #include "lib/rtimers/cxx11.hpp"
 #include "lib/pool/cxxpool.h"
@@ -14,13 +15,15 @@
 class Team
 {
 public:
-    Team(uint32_t sizeArg, bool shareResults): size(sizeArg), sharedResults() 
+    Team(uint32_t sizeArg, bool shareResults): size(sizeArg)
     {
         assert(this->size > 0);
 
         if (shareResults)
         {
             this->sharedResults.reset(new SharedResults{});
+//            this->sharedResults = std::make_shared<SharedResults>(*sharedResults);
+
         }
     }
     virtual ~Team() {}
@@ -37,10 +40,14 @@ public:
     virtual std::string getTeamName() { return this->getInnerName() + this->getXname() + "<" + std::to_string(this->size) + ">"; }
     uint32_t getSize() const { return this->size; }
 
+//    static uint64_t calcCollatzRecursive(InfInt n, uint64_t count,
+//                                  std::shared_ptr<SharedResults> shared);
+    static uint64_t calcCollatzRecursive(InfInt n, std::shared_ptr<SharedResults> shared);
 
 private:
     std::shared_ptr<SharedResults> sharedResults;
     uint32_t size;
+
 };
 
 class TeamSolo : public Team
