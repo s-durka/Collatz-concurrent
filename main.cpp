@@ -51,7 +51,11 @@ int main(int argc, char ** argv)
                 }
                 if (expectedResult)
                 {
-                                        printf("EXPECTED:\n");
+                    for (size_t i = 0; i < expectedResult->size(); i++) {
+//                        ContestResult* expected = expectedResult.get();
+                        printf("%lu, ", (*expectedResult)[i] - lastResult[i]);
+                    }
+                    printf("EXPECTED:\n");
                     for (auto number : *expectedResult) printf(" %lu, ", number);
                     printf("\nLAST :\n");
                     for (auto num2 : lastResult) printf(" %lu, ", num2);
