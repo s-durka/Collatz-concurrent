@@ -9,12 +9,6 @@ class SharedResults
 public:
     SharedResults() : arr{} {}
 
-    void print(uint64_t n) {
-        for (int i = 0; i < n; i++)
-            printf("%lu, ", arr[i]);
-        printf("\n");
-    }
-
     uint64_t getValue(InfInt key) {
         if (key >= SHARED_RESULTS_SIZE) return 0;
         return arr[key.toUnsignedLong()];

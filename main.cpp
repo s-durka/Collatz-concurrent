@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
                     expectedResult.reset(new ContestResult{});
                     *expectedResult = lastResult;
                 }
-                std::cout << "..." << timer.getStats().mean << "...\n";
+//                std::cout << "..." << timer.getStats().mean << "...\n";
             }
         }
     }

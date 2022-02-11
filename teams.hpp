@@ -67,7 +67,6 @@ public:
         }
         return result;
     }
-
     virtual std::string getInnerName() { return "TeamSolo"; }
 };
 
