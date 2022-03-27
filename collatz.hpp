@@ -25,6 +25,4 @@ inline uint64_t calcCollatz(InfInt n)
     return count;
 }
 
-
-
 #endif
