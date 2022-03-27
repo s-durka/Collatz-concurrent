@@ -1,1 +1,1 @@
-Różne implementacje współbieżnego obliczania problemu Collatza - zadanie zaliczeniowe 3 PW
+Różne implementacje współbieżnego obliczania problemu Collatza
