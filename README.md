@@ -1,1 +1,1 @@
-testowanie wydajności różnych współbieżnych implementacji problemu Collatza
+porównywanie wydajności różnych współbieżnych implementacji problemu Collatza
