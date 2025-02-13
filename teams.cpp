@@ -9,7 +9,7 @@
 
 uint64_t Team::calcCollatzRecursive(InfInt n, std::shared_ptr<SharedResults> shared)
 {
-    // It's ok even if the value overflow
+    // It's ok even if the value overflows
     assert(n > 0);
     uint64_t c;
 
@@ -46,9 +46,8 @@ void TeamNewThreads::insertCollatz(ContestResult & result, uint64_t i, uint64_t 
     cond.notify_all();
 }
 
-/* implementacja TeamNewThreads::runContestImpl,
- * gdzie podjeta zostala proba ambitniejszego wyboru watkow
- * na ktorych wolamy join() przy zapelnieniu puli.
+/* implementation of TeamNewThreads::runContestImpl,
+ * where join() is called when the thread pool is full.
  */
 ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 {
@@ -94,7 +93,7 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 
 
 /* 
-// wersja, gdzie join() wolany jest na watkach po kolei od poczatku
+// version where join() is called on threads sequentially from the beginning:
 ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
 {
    ContestResult result;

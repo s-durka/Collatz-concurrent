@@ -1,1 +1,2 @@
-porównywanie wydajności różnych współbieżnych implementacji problemu Collatza
+comparing the performance of different concurrent implementations of solving the Collatz problem
+
