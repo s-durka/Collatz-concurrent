@@ -28,8 +28,6 @@ int main(int argc, char ** argv)
             teams.push_back(std::shared_ptr<Team>(new TeamNewThreads{numWorkers, share}));
             teams.push_back(std::shared_ptr<Team>(new TeamConstThreads{numWorkers, share}));
             teams.push_back(std::shared_ptr<Team>(new TeamPool{numWorkers, share}));
-//            teams.push_back(std::shared_ptr<Team>(new TeamNewProcesses{numWorkers, share}));
-//            teams.push_back(std::shared_ptr<Team>(new TeamConstProcesses{numWorkers, share}));
         }
         teams.push_back(std::shared_ptr<Team>(new TeamAsync{1, share}));
     }
@@ -57,7 +55,7 @@ int main(int argc, char ** argv)
                     expectedResult.reset(new ContestResult{});
                     *expectedResult = lastResult;
                 }
-//                std::cout << "..." << timer.getStats().mean << "...\n";
+               std::cout << "..." << timer.getStats().mean << "...\n";
             }
         }
     }

@@ -92,39 +92,42 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
     return result;
 }
 
+
+/* 
 // wersja, gdzie join() wolany jest na watkach po kolei od poczatku
-//ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
-//{
-//    ContestResult result;
-//    result.resize(contestInput.size());
-//    uint64_t idx = 0;
-//
-//    uint32_t maxThreads = this->getSize();
-//    std::thread threads[maxThreads];
-//    uint64_t i = 0;
-//    bool threadsFull = false;
-//    for (InfInt const & singleInput : contestInput)
-//    {
-//        if (threadsFull) {
-//            threads[i].join();
-//        }
-//        threads[i] = createThread([&result, i, idx, &singleInput]
-//                                  { result[idx] = calcCollatz(singleInput); });
-//        ++idx;
-//        ++i;
-//        if (i == maxThreads) {
-//            threadsFull = true;
-//            i = 0;
-//        }
-//    }
-//    uint32_t min;
-//    if (maxThreads > idx) min = idx;
-//    else min = maxThreads;
-//    for (int k = 0; k < min; k++) {
-//        threads[k].join();
-//    }
-//    return result;
-//}
+ContestResult TeamNewThreads::runContestImpl(ContestInput const & contestInput)
+{
+   ContestResult result;
+   result.resize(contestInput.size());
+   uint64_t idx = 0;
+
+   uint32_t maxThreads = this->getSize();
+   std::thread threads[maxThreads];
+   uint64_t i = 0;
+   bool threadsFull = false;
+   for (InfInt const & singleInput : contestInput)
+   {
+       if (threadsFull) {
+           threads[i].join();
+       }
+       threads[i] = createThread([&result, i, idx, &singleInput]
+                                 { result[idx] = calcCollatz(singleInput); });
+       ++idx;
+       ++i;
+       if (i == maxThreads) {
+           threadsFull = true;
+           i = 0;
+       }
+   }
+   uint32_t min;
+   if (maxThreads > idx) min = idx;
+   else min = maxThreads;
+   for (int k = 0; k < min; k++) {
+       threads[k].join();
+   }
+   return result;
+}
+*/
 
 void TeamConstThreads::insertCollatz(ContestResult & result,
                                      ContestInput const & input,
@@ -177,20 +180,6 @@ ContestResult TeamPool::runContest(ContestInput const & contestInput)
     for (auto& f : futures) {
         f.get();
     }
-    return r;
-}
-
-ContestResult TeamNewProcesses::runContest(ContestInput const & contestInput)
-{
-    ContestResult r;
-    //TODO
-    return r;
-}
-
-ContestResult TeamConstProcesses::runContest(ContestInput const & contestInput)
-{
-    ContestResult r;
-    //TODO
     return r;
 }
 

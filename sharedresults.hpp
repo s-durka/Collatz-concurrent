@@ -3,6 +3,7 @@
 
 #define SHARED_RESULTS_SIZE 1000000
 #include <atomic>
+#include <array>
 
 class SharedResults
 {
